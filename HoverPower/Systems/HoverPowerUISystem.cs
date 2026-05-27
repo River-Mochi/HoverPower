@@ -27,6 +27,7 @@ namespace HoverPower.UI
         protected override void OnCreate()
         {
             base.OnCreate();
+            LogUtils.Info(() => $"{Mod.ModTag} HoverPowerUISystem created");
 
             InitializeKeybindActions();
 
@@ -108,6 +109,13 @@ namespace HoverPower.UI
 
         protected override void OnUpdate()
         {
+            // CRITICAL: base.OnUpdate() ticks the m_UpdateBindings list (PanelOpen, OutlineR, etc).
+            // Without this call, every GetterValueBinding we registered goes silent — UI never sees
+            // settings changes, button stays selected=false even after click, hotkey toggles the
+            // C# flag but the panel never opens. CWD avoids this trap by using ValueBinding (push)
+            // instead of GetterValueBinding (pull); we use the pull style, so we must call base.
+            base.OnUpdate();
+
             // Re-fetch if the action wasn't ready at OnCreate (RegisterKeyBindings race) or got dropped.
             RefreshKeybindActions();
 
