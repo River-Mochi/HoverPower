@@ -1,6 +1,6 @@
-import { Color, FocusKey, Theme, UniqueFocusKey } from "cs2/bindings";
+import { BalloonDirection, Color, FocusKey, Theme, UniqueFocusKey } from "cs2/bindings";
 import { ModuleRegistry } from "cs2/modding";
-import { HTMLAttributes } from "react";
+import { CSSProperties, HTMLAttributes, ReactNode } from "react";
 
 // Props for vanilla ColorField. Shape mirrors the in-game component at
 // game-ui/common/input/color-picker/color-field/color-field.tsx
@@ -11,7 +11,7 @@ export type PropsColorField = {
     className?: string;
     selectAction?: string;
     alpha?: boolean;
-    popupDirection?: "up" | "down" | "left" | "right";
+    popupDirection?: BalloonDirection;
     hideHint?: boolean;
     colorWheel?: boolean;
     hexInput?: boolean;
@@ -20,6 +20,29 @@ export type PropsColorField = {
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
     onClosePicker?: () => void;
+};
+
+export type PropsSlider = {
+    focusKey?: FocusKey | null;
+    value: number;
+    start: number;
+    end: number;
+    gamepadStep?: number;
+    disabled?: boolean;
+    vertical?: boolean;
+    sounds?: boolean;
+    thumb?: any;
+    theme?: Theme;
+    className?: string;
+    style?: CSSProperties;
+    children?: ReactNode;
+    noFill?: boolean;
+    valueTransformer?: (value: number, start: number, end: number) => number;
+    onChange?: (value: number) => void;
+    onDragStart?: () => void;
+    onDragEnd?: () => void;
+    onMouseOver?: () => void;
+    onMouseLeave?: () => void;
 };
 
 type PropsToolButton = {
@@ -57,6 +80,7 @@ const registryIndex = {
     mouseToolOptionsTheme: ["game-ui/game/components/tool-options/mouse-tool-options/mouse-tool-options.module.scss", "classes"],
     FOCUS_DISABLED: ["game-ui/common/focus/focus-key.ts", "FOCUS_DISABLED"],
     ColorField: ["game-ui/common/input/color-picker/color-field/color-field.tsx", "ColorField"],
+    Slider: ["game-ui/common/input/slider/slider.tsx", "Slider"],
 }
 
 export class VanillaResolver {
@@ -83,4 +107,5 @@ export class VanillaResolver {
     public get mouseToolOptionsTheme(): Theme | any { return this.cachedData["mouseToolOptionsTheme"] ?? this.updateCache("mouseToolOptionsTheme") }
     public get FOCUS_DISABLED(): UniqueFocusKey { return this.cachedData["FOCUS_DISABLED"] ?? this.updateCache("FOCUS_DISABLED") }
     public get ColorField(): (props: PropsColorField) => JSX.Element { return this.cachedData["ColorField"] ?? this.updateCache("ColorField") }
+    public get Slider(): (props: PropsSlider) => JSX.Element { return this.cachedData["Slider"] ?? this.updateCache("Slider") }
 }

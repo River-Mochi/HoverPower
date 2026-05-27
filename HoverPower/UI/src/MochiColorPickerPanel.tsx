@@ -2,9 +2,9 @@
 // Purpose: In-city panel anchored under the GameTopLeft icon button.
 // Layout (current):
 //   - Outline section:   vanilla ColorField (RGB + alpha + hex input + wheel popup)
-//   - Fill section:      single MochiColorSlider for alpha only (Fill RGB sliders dropped — they
+//   - Fill section:      vanilla Slider for fill alpha only (Fill RGB sliders dropped — they
 //                        didn't visibly do anything because we route Outline RGB to all surfaces)
-//   - Guidelines section: single MochiColorSlider mirroring the Options-UI Guidelines opacity
+//   - Guidelines section: vanilla Slider mirroring the Options-UI Guidelines opacity
 //                         (both surfaces write to Settings.GuidelineOpacityPercent; either works)
 //   - Presets row:       3 rectangular vanilla Buttons (Set1, Set2, Reset)
 //
@@ -18,7 +18,7 @@ import { Button, Tooltip } from "cs2/ui";
 import { Color } from "cs2/bindings";
 import { bindValue, trigger, useValue } from "cs2/api";
 import { VanillaResolver } from "./utils/VanilliaResolver";
-import { MochiColorSlider } from "./utils/MochiColorSlider";
+import styles from "./MochiColorPickerPanel.module.scss";
 
 const CHANNEL = "HoverPower";
 
@@ -63,19 +63,31 @@ export const MochiColorPickerPanel = () => {
     const [fillA, setFillA] = React.useState<number>(boundFillA);
     const [guidelineOpacity, setGuidelineOpacity] = React.useState<number>(boundGuideline);
 
+    React.useEffect(() => {
+        setOutline(boundOutline);
+    }, [boundOutline.r, boundOutline.g, boundOutline.b, boundOutline.a]);
+
+    React.useEffect(() => {
+        setFillA(boundFillA);
+    }, [boundFillA]);
+
+    React.useEffect(() => {
+        setGuidelineOpacity(boundGuideline);
+    }, [boundGuideline]);
+
     const handleOutlineChange = (c: Color) => {
         setOutline(c);
         trigger(CHANNEL, "SetOutlineColor", c.r, c.g, c.b, c.a);
     };
 
-    const handleFillAChange = (sliderPercent: number) => {
-        const a = Math.max(0, Math.min(1, sliderPercent / 100));
+    const handleFillAChange = (sliderValue: number) => {
+        const a = Math.max(0, Math.min(1, sliderValue));
         setFillA(a);
         trigger(CHANNEL, "SetFillAlpha", a);
     };
 
     const handleGuidelineChange = (percent: number) => {
-        const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+        const clamped = Math.max(0, Math.min(100, Math.round(percent / 5) * 5));
         setGuidelineOpacity(clamped);
         trigger(CHANNEL, "SetGuidelineOpacity", clamped);
     };
@@ -92,23 +104,24 @@ export const MochiColorPickerPanel = () => {
     const handleReset = () => applyPreset(PRESET_VANILLA_OUTLINE, PRESET_VANILLA_FILL_A);
 
     const ColorField = VanillaResolver.instance.ColorField;
+    const Slider = VanillaResolver.instance.Slider;
     const Section = VanillaResolver.instance.Section;
+    const focusDisabled = VanillaResolver.instance.FOCUS_DISABLED;
+    const numberFieldClass = VanillaResolver.instance.mouseToolOptionsTheme["number-field"];
 
     return (
-        <div style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            marginTop: "6rem",
-            zIndex: 10000,
-        }}>
-            <div className="panel_YqS menu_O_M">
-                <div className=" content_XD5 content_AD7 child-opacity-transition_nkS content_Hzl">
-                    <div style={{ padding: "8rem 8rem 4rem 8rem", display: "flex", flexDirection: "column", gap: "8rem" }}>
+        <div className={styles.panelAnchor}>
+            <div className={`panel_YqS menu_O_M ${styles.panelFrame}`}>
+                <div className={` content_XD5 content_AD7 child-opacity-transition_nkS content_Hzl ${styles.panelContent}`}>
+                    <div className={styles.body}>
                         <Section title="Outline">
                             <ColorField
+                                focusKey={focusDisabled}
+                                className={styles.outlineField}
                                 value={outline}
                                 alpha={true}
+                                popupDirection="down"
+                                hideHint={true}
                                 hexInput={true}
                                 colorWheel={true}
                                 onChange={handleOutlineChange}
@@ -116,36 +129,41 @@ export const MochiColorPickerPanel = () => {
                         </Section>
 
                         <Section title="Fill">
-                            <MochiColorSlider
-                                className="sliderAlpha"
-                                min={0}
-                                max={100}
-                                step={1}
-                                value={fillA * 100}
-                                onChange={handleFillAChange}
-                                formatValue={(v) => v.toFixed(0)}
-                            />
+                            <div className={styles.sliderRow}>
+                                <Slider
+                                    focusKey={focusDisabled}
+                                    className={styles.slider}
+                                    value={fillA}
+                                    start={0}
+                                    end={1}
+                                    gamepadStep={0.01}
+                                    onChange={handleFillAChange}
+                                />
+                                <div className={`${styles.valueField} ${numberFieldClass}`}>
+                                    {`${Math.round(fillA * 100)}%`}
+                                </div>
+                            </div>
                         </Section>
 
                         <Section title="Guidelines">
-                            <MochiColorSlider
-                                min={0}
-                                max={100}
-                                step={5}
-                                value={guidelineOpacity}
-                                onChange={handleGuidelineChange}
-                                formatValue={(v) => `${v.toFixed(0)}%`}
-                            />
+                            <div className={styles.sliderRow}>
+                                <Slider
+                                    focusKey={focusDisabled}
+                                    className={styles.slider}
+                                    value={guidelineOpacity}
+                                    start={0}
+                                    end={100}
+                                    gamepadStep={5}
+                                    onChange={handleGuidelineChange}
+                                />
+                                <div className={`${styles.valueField} ${numberFieldClass}`}>
+                                    {`${guidelineOpacity}%`}
+                                </div>
+                            </div>
                         </Section>
                     </div>
 
-                    <div style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        gap: "4rem",
-                        padding: "8rem",
-                        borderTop: "1rem solid rgba(255, 255, 255, 0.15)",
-                    }}>
+                    <div className={styles.actions}>
                         <Tooltip tooltip="Preset 1: light gray, 10% halo alpha. Subtle ambient highlight.">
                             <Button variant="menu" onSelect={handleSet1}>
                                 Set1
