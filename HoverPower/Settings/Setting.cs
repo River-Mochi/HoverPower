@@ -27,9 +27,9 @@ namespace HoverPower.Settings
 
         // Group IDs
         internal const string Guidelines = nameof(Guidelines);
+        internal const string KeyBindings = nameof(KeyBindings);
         internal const string AboutInfo = nameof(AboutInfo);
         internal const string AboutLinks = nameof(AboutLinks);
-
 
         private const string AboutLinksRow = nameof(AboutLinksRow);
         // Same Paradox URL pattern as CityWatchdog — lands on River-Mochi's author page filtered to CS2.
