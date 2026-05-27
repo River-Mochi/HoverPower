@@ -1,17 +1,17 @@
 {
-  "MagicHighlights.Panel.Title": "Mochi's 'Magic Highlights",
-  "MagicHighlights.Panel.Tooltip": "Pick the inner fill and outer outline colors for hovered objects.",
+  "HighlightsOpacity.Panel.Title": "Mochi's 'Magic Highlights",
+  "HighlightsOpacity.Panel.Tooltip": "Pick the inner fill and outer outline colors for hovered objects.",
 
-  "MagicHighlights.Panel.Section.Fill": "Fill",
-  "MagicHighlights.Panel.Section.Outline": "Outline",
+  "HighlightsOpacity.Panel.Section.Fill": "Fill",
+  "HighlightsOpacity.Panel.Section.Outline": "Outline",
 
-  "MagicHighlights.Panel.Reset.Label": "Reset",
-  "MagicHighlights.Panel.Reset.Tooltip": "Reset colors to game defaults, cyan blue.",
+  "HighlightsOpacity.Panel.Reset.Label": "Reset",
+  "HighlightsOpacity.Panel.Reset.Tooltip": "Reset colors to game defaults, cyan blue.",
 
-  "MagicHighlights.Slider.Red": "Red",
-  "MagicHighlights.Slider.Green": "Green",
-  "MagicHighlights.Slider.Blue": "Blue",
-  "MagicHighlights.Slider.Alpha": "Alpha",
+  "HighlightsOpacity.Slider.Red": "Red",
+  "HighlightsOpacity.Slider.Green": "Green",
+  "HighlightsOpacity.Slider.Blue": "Blue",
+  "HighlightsOpacity.Slider.Alpha": "Alpha",
 
-  "MagicHighlights.TopLeft.Tooltip": "Magic Highlights — outline colors"
+  "HighlightsOpacity.TopLeft.Tooltip": "Magic Highlights — outline colors"
 }

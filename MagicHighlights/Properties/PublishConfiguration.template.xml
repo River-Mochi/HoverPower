@@ -28,7 +28,7 @@
 
     </ChangeLog>
     <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon, buymeacoffee, kofi, crowdin, gitlab-->
-    <ExternalLink Type="github" Url="https://github.com/River-Mochi/MagicHighlights" />
+    <ExternalLink Type="github" Url="https://github.com/River-Mochi/HighlightsOpacity" />
     <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
     <!--Supported values Public, Private, Unlisted-->
     <AccessLevel Value="Unlisted" />

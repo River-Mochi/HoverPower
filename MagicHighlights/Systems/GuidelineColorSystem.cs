@@ -20,11 +20,11 @@
 using CS2Shared.RiverMochi;
 using Game;
 using Game.Prefabs;
-using MagicHighlights.Settings;
+using HighlightsOpacity.Settings;
 using Unity.Entities;
 using UnityEngine;
 
-namespace MagicHighlights.Systems
+namespace HighlightsOpacity.Systems
 {
     public partial class GuidelineColorSystem : GameSystemBase
     {
@@ -51,7 +51,7 @@ namespace MagicHighlights.Systems
 
         protected override void OnUpdate()
         {
-            MagicHighlightsSettings? settings = Mod.Settings;
+            HighlightsOpacitySettings? settings = Mod.Settings;
             if (settings == null)
             {
                 return;

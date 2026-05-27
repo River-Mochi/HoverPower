@@ -2,7 +2,7 @@
 // Purpose: Defines Magic Highlights settings, persistent storage, and the Options UI surface.
 // Layout: 2 tabs (Actions, About) following CityWatchdog/EasyZoning convention.
 // Note: the eight outline RGBA floats are NOT decorated for Options UI — they are read by the
-// in-city color-picker panel via cs2/api bindings (see Systems/MagicHighlightsUISystem.cs).
+// in-city color-picker panel via cs2/api bindings (see Systems/HighlightsOpacityUISystem.cs).
 
 using Colossal.IO.AssetDatabase;
 using CS2Shared.RiverMochi;
@@ -12,13 +12,13 @@ using Game.UI;
 using System;
 using UnityEngine;
 
-namespace MagicHighlights.Settings
+namespace HighlightsOpacity.Settings
 {
-    [FileLocation("ModsSettings/MagicHighlights/MagicHighlights")]
+    [FileLocation("ModsSettings/HighlightsOpacity/HighlightsOpacity")]
     [SettingsUITabOrder(Actions, About)]
     [SettingsUIGroupOrder(Guidelines, AboutInfo, AboutLinks)]
     [SettingsUIShowGroupName(Guidelines)]
-    public class MagicHighlightsSettings : ModSetting
+    public class HighlightsOpacitySettings : ModSetting
     {
         // Tab IDs
         internal const string Actions = nameof(Actions);
@@ -36,7 +36,7 @@ namespace MagicHighlights.Settings
 
 
         // -----------------------------------------------------------------------
-        // In-city color-picker bindings (driven by Systems/MagicHighlightsUISystem)
+        // In-city color-picker bindings (driven by Systems/HighlightsOpacityUISystem)
         // Not decorated for Options UI — these are data fields the cs2/api bindings read/write
         // and the OutlineColorSystem applies. Field layout after the post-alpha redesign:
         //   - OutlineR/G/B  → outline halo edge color + fill overlay color + lot-pattern tint
@@ -97,7 +97,7 @@ namespace MagicHighlights.Settings
         // Construction + defaults
         // -----------------------------------------------------------------------
 
-        public MagicHighlightsSettings(IMod mod) : base(mod)
+        public HighlightsOpacitySettings(IMod mod) : base(mod)
         {
             SetDefaults();
         }

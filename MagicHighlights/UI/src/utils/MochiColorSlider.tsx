@@ -48,7 +48,7 @@ export const MochiColorSlider: React.FC<MochiSliderProps> = ({
         e.preventDefault();
         e.stopPropagation();
 
-        trigger("MagicHighlights", "UiInteracted");
+        trigger("HighlightsOpacity", "UiInteracted");
 
         onDragStart?.();
 

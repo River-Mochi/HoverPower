@@ -18,7 +18,7 @@ import { bindValue, trigger, useValue } from "cs2/api";
 import { VanillaResolver } from "./utils/VanilliaResolver";
 import { MochiColorSlider } from "./utils/MochiColorSlider";
 
-const CHANNEL = "MagicHighlights";
+const CHANNEL = "HighlightsOpacity";
 
 const outlineR$ = bindValue<number>(CHANNEL, "OutlineR", 0.502);
 const outlineG$ = bindValue<number>(CHANNEL, "OutlineG", 0.869);

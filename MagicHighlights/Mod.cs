@@ -1,7 +1,7 @@
 // File: Mod.cs
 // Purpose: Mod entrypoint; registers settings, schedules systems, and configures the mod logger.
 
-namespace MagicHighlights
+namespace HighlightsOpacity
 {
     using Colossal;
     using Colossal.IO.AssetDatabase;
@@ -11,19 +11,19 @@ namespace MagicHighlights
     using Game;
     using Game.Modding;
     using Game.SceneFlow;
-    using MagicHighlights.Localization;
-    using MagicHighlights.Settings;
-    using MagicHighlights.Systems;
-    using MagicHighlights.UI;
+    using HighlightsOpacity.Localization;
+    using HighlightsOpacity.Settings;
+    using HighlightsOpacity.Systems;
+    using HighlightsOpacity.UI;
     using System;
     using System.Reflection;
     using Unity.Entities;
 
     public sealed class Mod : IMod
     {
-        public const string ModName = "Magic Highlights";
-        public const string ModId = "MagicHighlights";
-        public const string ModTag = "[MMH]";
+        public const string ModName = "Highlights + Opacity Tuner";
+        public const string ModId = "HighlightsOpacity";
+        public const string ModTag = "[HOT]";
 
         public static readonly string ModVersion =
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.5.0";
@@ -31,7 +31,7 @@ namespace MagicHighlights
         public static readonly ILog s_Log =
             LogManager.GetLogger(ModId).SetShowsErrorsInUI(false);
 
-        public static MagicHighlightsSettings? Settings { get; private set; }
+        public static HighlightsOpacitySettings? Settings { get; private set; }
 
         private static bool s_BannerLogged;
 
@@ -58,12 +58,12 @@ namespace MagicHighlights
                 return;
             }
 
-            MagicHighlightsSettings setting = new MagicHighlightsSettings(this);
+            HighlightsOpacitySettings setting = new HighlightsOpacitySettings(this);
             Settings = setting;
 
             try
             {
-                AssetDatabase.global.LoadSettings(ModId, setting, new MagicHighlightsSettings(this));
+                AssetDatabase.global.LoadSettings(ModId, setting, new HighlightsOpacitySettings(this));
             }
             catch (Exception ex)
             {
@@ -122,7 +122,7 @@ namespace MagicHighlights
         {
             DebugLog(() => $"{ModTag} Mod Dispose");
 
-            MagicHighlightsSettings? setting = Settings;
+            HighlightsOpacitySettings? setting = Settings;
             if (setting != null)
             {
                 try
@@ -146,7 +146,7 @@ namespace MagicHighlights
             World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<GuidelineColorSystem>();
             updateSystem.UpdateAt<GuidelineColorSystem>(SystemUpdatePhase.Rendering);
 
-            updateSystem.UpdateAt<MagicHighlightsUISystem>(SystemUpdatePhase.UIUpdate);
+            updateSystem.UpdateAt<HighlightsOpacityUISystem>(SystemUpdatePhase.UIUpdate);
         }
 
         private static void LogStartupBanner()

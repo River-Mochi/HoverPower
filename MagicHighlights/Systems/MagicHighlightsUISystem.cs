@@ -1,4 +1,4 @@
-// File: Systems/MagicHighlightsUISystem.cs
+// File: Systems/HighlightsOpacityUISystem.cs
 // Purpose: Bridges Mod settings to/from the cs2/api bindings the UI (cohtml) layer reads.
 // Post-redesign binding shape:
 //   Getters (settings -> UI):
@@ -10,11 +10,11 @@
 
 using Colossal.UI.Binding;
 using Game.UI;
-using MagicHighlights.Settings;
+using HighlightsOpacity.Settings;
 
-namespace MagicHighlights.UI
+namespace HighlightsOpacity.UI
 {
-    public partial class MagicHighlightsUISystem : UISystemBase
+    public partial class HighlightsOpacityUISystem : UISystemBase
     {
         protected override void OnCreate()
         {
@@ -45,7 +45,7 @@ namespace MagicHighlights.UI
                 "SetOutlineColor",
                 (r, g, b, a) =>
                 {
-                    MagicHighlightsSettings? settings = Mod.Settings;
+                    HighlightsOpacitySettings? settings = Mod.Settings;
                     if (settings == null) return;
 
                     settings.OutlineR = r;
@@ -60,7 +60,7 @@ namespace MagicHighlights.UI
                 "SetFillAlpha",
                 a =>
                 {
-                    MagicHighlightsSettings? settings = Mod.Settings;
+                    HighlightsOpacitySettings? settings = Mod.Settings;
                     if (settings == null) return;
 
                     settings.FillA = a;
