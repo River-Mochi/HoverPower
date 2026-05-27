@@ -1,27 +1,25 @@
 // File: UI/src/ModIconButton.tsx
 // Purpose: Floating GameTopLeft launcher button for the Hover Power in-city panel.
 //
-// Rendering pattern — matches the OTHER documented branch of CityWatchdog's EntryButton comment:
-//   "For a white/tintable icons use Monochrome/tinted path:
-//      <Icon tinted={true} src={ModIconPath} /> inside the Button body"
+// Rendering pattern — IDENTICAL to EasyZoning's ez-zone-tool-button.tsx and CityWatchdog's
+// EntryButton.tsx: <Button variant="floating" src={iconPath} selected={isOpen} onSelect={...}>.
+// The SVG is passed as the `src` prop so its own colors render straight (single color today,
+// multi-color tomorrow if the SVG is swapped) and the vanilla floating-button styling owns the
+// hover + selected (light-blue overlay when active) visuals automatically.
 //
-// Why tinted (not Button src={...}): our SVG is a FILLED solid-white path (the icon area is
-// the fill, the detail lines are negative-space cutouts). Rendered as an <img> via Button.src
-// it shows as a near-square white blob. Tinted Icon uses the SVG as a CSS mask instead — the
-// vanilla theme paints the mask shape in the correct color (white-on-dark normally, vanilla
-// blue overlay when selected={true}) — same visual GTL as CWD/EasyZoning GTL.
-//
-// Panel-open state is the shared C# binding PanelOpen so the H hotkey + button click stay in sync.
+// Panel-open state lives in C# (Settings/Mod -> HoverPowerUISystem.s_PanelOpen) so the H hotkey
+// and this button stay in sync — if the GTL render fails for any reason, pressing H still works
+// (the panel reads PanelOpen too).
 
 import React from "react";
-import { Button, Icon, Tooltip } from "cs2/ui";
+import { Button, Tooltip } from "cs2/ui";
 import { bindValue, trigger, useValue } from "cs2/api";
 import { MochiColorPickerPanel } from "./MochiColorPickerPanel";
 import styles from "./ModIconButton.module.scss";
 
-// Webpack emits this to coui://ui-mods/images/. We use the Active variant as the base icon
-// (per user instruction). OutlineColors.svg stays in the images/ folder unused — harmless.
-import ModIconPath from "../images/OutlineColors.svg";
+// Webpack emits the file to coui://ui-mods/images/. The SVG content itself controls how the
+// icon looks — when the file changes (e.g. add fill colors), no code change here is needed.
+import ModIconPath from "../images/OutlineColorsActive.svg";
 
 const CHANNEL = "HoverPower";
 const panelOpen$ = bindValue<boolean>(CHANNEL, "PanelOpen", false);
@@ -34,11 +32,10 @@ export default () => {
             <Tooltip tooltip="Hover Power">
                 <Button
                     variant="floating"
+                    src={ModIconPath}
                     selected={isOpen}
                     onSelect={() => trigger(CHANNEL, "SetPanelOpen", !isOpen)}
-                >
-                    <Icon tinted={true} src={ModIconPath} />
-                </Button>
+                />
             </Tooltip>
 
             {isOpen && <MochiColorPickerPanel />}
