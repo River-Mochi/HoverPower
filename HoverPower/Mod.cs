@@ -9,6 +9,7 @@ namespace HoverPower
     using Colossal.Logging;
     using CS2Shared.RiverMochi;
     using Game;
+    using Game.Input;
     using Game.Modding;
     using Game.SceneFlow;
     using HoverPower.Localization;
@@ -18,6 +19,7 @@ namespace HoverPower
     using System;
     using System.Reflection;
     using Unity.Entities;
+    using UnityEngine.InputSystem;
 
     public sealed class Mod : IMod
     {
@@ -85,11 +87,55 @@ namespace HoverPower
 
             try
             {
+                setting.RegisterKeyBindings();
+                EnableTogglePanelAction(setting);
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Error(() => $"{ModTag} Keybinding registration failed: {ex.GetType().Name}: {ex.Message}", ex);
+            }
+
+            try
+            {
                 ScheduleSystems(updateSystem);
             }
             catch (Exception ex)
             {
                 LogUtils.Error(() => $"{ModTag} System scheduling failed: {ex.GetType().Name}: {ex.Message}", ex);
+            }
+        }
+
+        // Wires the H hotkey to HoverPowerUISystem.TogglePanel(). Pattern matches CityWatchdog:
+        //   1. setting.RegisterKeyBindings() in OnLoad (above)
+        //   2. setting.GetAction(actionName) to fetch the ProxyAction created by the attribute
+        //   3. shouldBeEnabled = true so the action receives input
+        //   4. onInteraction += handler so we get called when the key fires
+        private static void EnableTogglePanelAction(HoverPowerSettings setting)
+        {
+            try
+            {
+                ProxyAction action = setting.GetAction(kTogglePanelActionName);
+                if (action == null)
+                {
+                    LogUtils.Warn(() => $"{ModTag} ProxyAction '{kTogglePanelActionName}' not found.");
+                    return;
+                }
+
+                action.shouldBeEnabled = true;
+                action.onInteraction += OnTogglePanelInteraction;
+            }
+            catch (Exception ex)
+            {
+                LogUtils.Warn(() => $"{ModTag} EnableTogglePanelAction failed: {ex.GetType().Name}: {ex.Message}", ex);
+            }
+        }
+
+        private static void OnTogglePanelInteraction(ProxyAction _, InputActionPhase phase)
+        {
+            // Only react to the press (Performed) phase, not the press-down / release frames.
+            if (phase == InputActionPhase.Performed)
+            {
+                HoverPowerUISystem.TogglePanel();
             }
         }
 

@@ -38,6 +38,7 @@ namespace HoverPower.Localization
                 { m_Settings.GetOptionTabLocaleID(HoverPowerSettings.About), "About" },
 
                 // Groups
+                { m_Settings.GetOptionGroupLocaleID(HoverPowerSettings.KeyBindings), "Key bindings" },
                 { m_Settings.GetOptionGroupLocaleID(HoverPowerSettings.Guidelines), "Guidelines" },
                 // AboutInfo + AboutLinks intentionally have empty group headers.
                 { m_Settings.GetOptionGroupLocaleID(HoverPowerSettings.AboutInfo), string.Empty },

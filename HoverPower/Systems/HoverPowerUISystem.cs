@@ -1,14 +1,19 @@
 // File: Systems/HoverPowerUISystem.cs
-// Purpose: Bridges Mod settings to/from the cs2/api bindings the UI (cohtml) layer reads.
-// Post-redesign binding shape:
-//   Getters (settings -> UI):
-//     OutlineR, OutlineG, OutlineB, OutlineA, FillA, GuidelineOpacityPercent
-//   Triggers (UI -> settings):
-//     SetOutlineColor(r, g, b, a)         — fired by the vanilla ColorField onChange
-//     SetFillAlpha(a)                     — fired by the Fill alpha slider onChange
-//     SetGuidelineOpacity(percent)        — fired by the in-city Guidelines slider
-//                                           (Options-UI slider for the same field stays as fallback)
-// OutlineColorSystem + GuidelineColorSystem (Rendering phase) pick up changes via their dirty-flag.
+// Purpose: Bridges Mod settings to/from the cs2/api bindings the UI (cohtml) layer reads,
+// and owns the shared panel-open flag toggled by both the GTL button and the H hotkey.
+//
+// Binding shape:
+//   Getters (UISystem -> UI):
+//     OutlineR, OutlineG, OutlineB, OutlineA, FillA, GuidelineOpacityPercent, PanelOpen
+//   Triggers (UI -> UISystem):
+//     SetOutlineColor(r, g, b, a)         — vanilla ColorField onChange
+//     SetFillAlpha(a)                     — Fill alpha slider onChange
+//     SetGuidelineOpacity(percent)        — in-city Guidelines slider (Options-UI slider is fallback)
+//     SetPanelOpen(open)                  — GTL button onSelect flips the shared panel flag
+//
+// OutlineColorSystem + GuidelineColorSystem (Rendering phase) pick up settings changes via dirty-flag.
+// The hotkey (Setting.TogglePanelBinding "H") fires a ProxyAction handled in Mod.cs which calls
+// the static TogglePanel() helper below — the GTL button reads the same flag via PanelOpen.
 
 using Colossal.UI.Binding;
 using Game.UI;
@@ -18,6 +23,16 @@ namespace HoverPower.UI
 {
     public partial class HoverPowerUISystem : UISystemBase
     {
+        // Shared panel-open flag. Toggled by either the GTL button (SetPanelOpen trigger) or the
+        // hotkey (TogglePanel() static called from Mod.cs onInteraction handler).
+        private static bool s_PanelOpen;
+
+        // Called from Mod.cs when the TogglePanel ProxyAction fires.
+        public static void TogglePanel()
+        {
+            s_PanelOpen = !s_PanelOpen;
+        }
+
         protected override void OnCreate()
         {
             base.OnCreate();
@@ -45,6 +60,10 @@ namespace HoverPower.UI
             AddUpdateBinding(new GetterValueBinding<int>(
                 Mod.ModId, "GuidelineOpacityPercent",
                 () => Mod.Settings?.GuidelineOpacityPercent ?? 100));
+
+            AddUpdateBinding(new GetterValueBinding<bool>(
+                Mod.ModId, "PanelOpen",
+                () => s_PanelOpen));
 
             AddBinding(new TriggerBinding<float, float, float, float>(
                 Mod.ModId,
@@ -87,6 +106,11 @@ namespace HoverPower.UI
                     settings.GuidelineOpacityPercent = percent;
                     settings.ApplyAndSave();
                 }));
+
+            AddBinding(new TriggerBinding<bool>(
+                Mod.ModId,
+                "SetPanelOpen",
+                open => s_PanelOpen = open));
         }
     }
 }

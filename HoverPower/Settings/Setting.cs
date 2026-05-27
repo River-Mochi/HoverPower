@@ -17,8 +17,8 @@ namespace HoverPower.Settings
 
     [FileLocation("ModsSettings/HoverPower/HoverPower")]
     [SettingsUITabOrder(Actions, About)]
-    [SettingsUIGroupOrder(Guidelines, AboutInfo, AboutLinks)]
-    [SettingsUIShowGroupName(Guidelines)]
+    [SettingsUIGroupOrder(KeyBindings, Guidelines, AboutInfo, AboutLinks)]
+    [SettingsUIShowGroupName(KeyBindings, Guidelines)]
     public class HoverPowerSettings : ModSetting
     {
         // Tab IDs
