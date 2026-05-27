@@ -22,21 +22,7 @@ Two render surfaces are affected:
 
 So the inner/outer alpha sliders visibly change the outline halo, while the RGB changes also tint the lot pattern.
 
-## API priority
 
-Wherever possible this mod uses, in order:
-1. **CO (Colossal) API** — `Game.*`, `Colossal.*`, ECS components like `RenderingSettingsData`
-2. **Unity API** — HDRP `CustomPassVolume` + `OutlinesWorldUIPass` material properties
-3. **System .NET** — only where neither of the above fits
-4. **Custom code** — last resort
-
-## Building
-
-Requires the [CS2 Modding Toolchain](https://cs2.paradoxwikis.com/Modding) (`CSII_TOOLPATH` env var set).
-Open `MagicHighlights.sln` in Visual Studio 2026 (or `dotnet build` from CLI). The MSBuild targets handle:
-- The C# build into `${CSII_USERDATAPATH}\Mods\MagicHighlights\MagicHighlights.dll`
-- `npm ci` (if `package-lock.json` changed) + `npm run build` for the UI bundle, writing directly into the same Mods folder
-- `Scripts/Update-PublishConfig.ps1` syncs `<ModVersion>` and `mod.json` `"version"` from the csproj `<Version>` on every build
 
 ## License
 
