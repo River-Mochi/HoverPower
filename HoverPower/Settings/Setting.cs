@@ -43,6 +43,7 @@ namespace HoverPower.Settings
         //   - OutlineR/G/B  → outline halo edge color + fill overlay color + lot-pattern tint
         //     (one color choice drives every visible surface so the panel only needs one swatch)
         //   - OutlineA     → outline halo edge opacity  (material _OuterColor.a)
+        //   - AreaBorderA  → owner / area-border opacity (RenderingSettingsData.m_OwnerColor.a)
         //   - FillA        → fill overlay opacity inside the silhouette (material _InnerColor.a)
         // The dropped OutlineInner*/OutlineOuter* fields from the early alpha are gone — their
         // saved values from the .coc file are ignored and replaced by SetDefaults() on next load.
@@ -52,6 +53,7 @@ namespace HoverPower.Settings
         public float OutlineG { get; set; }
         public float OutlineB { get; set; }
         public float OutlineA { get; set; }
+        public float AreaBorderA { get; set; }
         public float FillA { get; set; }
 
         // -----------------------------------------------------------------------
@@ -114,6 +116,7 @@ namespace HoverPower.Settings
             OutlineG = 0.869f;
             OutlineB = 1f;
             OutlineA = 0.855f;
+            AreaBorderA = 0.702f;
 
             // FillA=0 matches vanilla CS2: no extra silhouette overlay until the player turns it up.
             FillA = 0f;

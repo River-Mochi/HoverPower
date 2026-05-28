@@ -49,6 +49,10 @@ namespace HoverPower.UI
                 () => Mod.Settings?.OutlineA ?? 0.855f));
 
             AddUpdateBinding(new GetterValueBinding<float>(
+                Mod.ModId, "AreaBorderA",
+                () => Mod.Settings?.AreaBorderA ?? 0.702f));
+
+            AddUpdateBinding(new GetterValueBinding<float>(
                 Mod.ModId, "FillA",
                 () => Mod.Settings?.FillA ?? 0f));
 
@@ -72,6 +76,18 @@ namespace HoverPower.UI
                     settings.OutlineG = g;
                     settings.OutlineB = b;
                     settings.OutlineA = a;
+                    settings.ApplyAndSave();
+                }));
+
+            AddBinding(new TriggerBinding<float>(
+                Mod.ModId,
+                "SetAreaAlpha",
+                a =>
+                {
+                    HoverPowerSettings? settings = Mod.Settings;
+                    if (settings == null) return;
+
+                    settings.AreaBorderA = a;
                     settings.ApplyAndSave();
                 }));
 
@@ -115,7 +131,36 @@ namespace HoverPower.UI
                     settings.OutlineG = hovered.g;
                     settings.OutlineB = hovered.b;
                     settings.OutlineA = OutlineColorSystem.CapturedOutlineA;
+                    settings.AreaBorderA = OutlineColorSystem.CapturedAreaBorderA;
                     settings.FillA = OutlineColorSystem.CapturedFillA;
+                    settings.ApplyAndSave();
+                }));
+
+            AddBinding(new TriggerBinding(
+                Mod.ModId,
+                "ResetOutlineToVanilla",
+                () =>
+                {
+                    HoverPowerSettings? settings = Mod.Settings;
+                    if (settings == null) return;
+
+                    UnityEngine.Color hovered = OutlineColorSystem.CapturedHoveredColor;
+                    settings.OutlineR = hovered.r;
+                    settings.OutlineG = hovered.g;
+                    settings.OutlineB = hovered.b;
+                    settings.OutlineA = OutlineColorSystem.CapturedOutlineA;
+                    settings.ApplyAndSave();
+                }));
+
+            AddBinding(new TriggerBinding(
+                Mod.ModId,
+                "ResetAreaToVanilla",
+                () =>
+                {
+                    HoverPowerSettings? settings = Mod.Settings;
+                    if (settings == null) return;
+
+                    settings.AreaBorderA = OutlineColorSystem.CapturedAreaBorderA;
                     settings.ApplyAndSave();
                 }));
 
