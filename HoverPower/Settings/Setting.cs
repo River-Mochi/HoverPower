@@ -114,7 +114,6 @@ namespace HoverPower.Settings
         public override void SetDefaults()
         {
             // Vanilla cyan-blue from the OutlinesWorldUIPass material defaults
-            // (confirmed by Mert's testing in https://github.com/Flashbond/Mert-OutlineColor).
             OutlineR = 0.502f;
             OutlineG = 0.869f;
             OutlineB = 1f;
