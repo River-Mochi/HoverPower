@@ -38,7 +38,7 @@ namespace HoverPower.Localization
                 { m_Settings.GetOptionTabLocaleID(HoverPowerSettings.About), "About" },
 
                 // Groups
-                { m_Settings.GetOptionGroupLocaleID(HoverPowerSettings.ToolColors), "Tool colors" },
+                { m_Settings.GetOptionGroupLocaleID(HoverPowerSettings.ToolColors), "Tool Color Behavior" },
                 { m_Settings.GetOptionGroupLocaleID(HoverPowerSettings.KeyBindings), "Key bindings" },
                 { m_Settings.GetOptionGroupLocaleID(HoverPowerSettings.Guidelines), "Guidelines" },
                 // AboutInfo + AboutLinks intentionally have empty group headers.
@@ -46,17 +46,18 @@ namespace HoverPower.Localization
                 { m_Settings.GetOptionGroupLocaleID(HoverPowerSettings.AboutLinks), string.Empty },
 
                 // Tool color behavior
-                { m_Settings.GetOptionLabelLocaleID(nameof(HoverPowerSettings.ToolColorMode)), "Bulldozer / road color behavior" },
+                { m_Settings.GetOptionLabelLocaleID(nameof(HoverPowerSettings.ToolColorMode)), "Bulldozer + Roads" },
                 { m_Settings.GetOptionDescLocaleID(nameof(HoverPowerSettings.ToolColorMode)),
-                    "Controls temporary outline colors while Bulldozer, Better Bulldozer, or road tools are active.\n\n" +
-                    "**Mod recommended** uses the game's WarningColor for demolition and a softer vanilla blue for roads.\n" +
-                    "**Vanilla tool colors** restores the game's normal vanilla blue while those tools are active.\n" +
-                    "**Keep my custom color** uses your chosen Hover Power color everywhere.\n\n" +
-                    "This does not overwrite your saved custom color."
+                    "Controls temporary outline colors while bulldozer, or road tools are active.\n\n" +
+                    "**1. Recommended** uses game's WarningColor for demolition and a softer vanilla blue for roads.\n" +
+                    "**2. Vanilla tool colors** restores the game's normal vanilla blue while those tools are active.\n" +
+                    "**3. Keep my custom color** uses your chosen color everywhere.\n\n" +
+                    "This does not overwrite your automatically saved custom color in the color picker.\n"+
+                    "This feature exists because some users find their custom color hard to see while bulldozing, and wanted stronger color outlines back on during tool usage. 
                 },
-                { m_Settings.GetToolColorModeLocaleID("Recommended"), "Mod recommended" },
-                { m_Settings.GetToolColorModeLocaleID("Vanilla"), "Vanilla tool colors" },
-                { m_Settings.GetToolColorModeLocaleID("Custom"), "Keep my custom color" },
+                { m_Settings.GetToolColorModeLocaleID("Recommended"), "1. Recommended" },
+                { m_Settings.GetToolColorModeLocaleID("Vanilla"), "2. Vanilla tool colors" },
+                { m_Settings.GetToolColorModeLocaleID("Custom"), "3. Keep my custom color" },
 
                 // Guidelines opacity slider
                 { m_Settings.GetOptionLabelLocaleID(nameof(HoverPowerSettings.GuidelineOpacityPercent)), "Guidelines opacity" },
