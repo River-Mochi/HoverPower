@@ -65,10 +65,26 @@ export const MochiColorPickerPanel = () => {
     const surfaceToolAreasSuppressed = useValue(surfaceToolAreasSuppressed$);
     const vanillaOutlineActive = useValue(vanillaOutlineActive$);
     const { translate } = useLocalization();
-    const l = React.useCallback(
-        (key: LocaleKey) => translate(key, locale[key]) ?? locale[key],
-        [translate],
-    );
+    const text = React.useMemo(() => {
+        const l = (key: LocaleKey) => translate(key, locale[key]) ?? locale[key];
+        return {
+            ariaClosePanel: l("HoverPower.UI.Aria.ClosePanel"),
+            title: l("HoverPower.UI.Title"),
+            tooltipClose: l("HoverPower.UI.Tooltip.Close"),
+            tooltipDraggable: l("HoverPower.UI.Tooltip.Draggable"),
+            tooltipFillOpacity: l("HoverPower.UI.Tooltip.FillOpacity"),
+            tooltipGuidelinesOpacity: l("HoverPower.UI.Tooltip.GuidelinesOpacity"),
+            tooltipInfo: l("HoverPower.UI.Tooltip.Info"),
+            tooltipOutlineSwatch: l("HoverPower.UI.Tooltip.OutlineSwatch"),
+            tooltipPreset1: l("HoverPower.UI.Tooltip.Preset1"),
+            tooltipPreset2: l("HoverPower.UI.Tooltip.Preset2"),
+            tooltipReset: l("HoverPower.UI.Tooltip.Reset"),
+            tooltipResetFill: l("HoverPower.UI.Tooltip.ResetFill"),
+            tooltipResetGuidelines: l("HoverPower.UI.Tooltip.ResetGuidelines"),
+            tooltipResetOutline: l("HoverPower.UI.Tooltip.ResetOutline"),
+            tooltipSurfaceToggle: l("HoverPower.UI.Tooltip.SurfaceToggle"),
+        };
+    }, [translate]);
 
     const [outline, setOutline] = React.useState<Color>(boundOutline);
     const [fillA, setFillA] = React.useState<number>(boundFillA);
@@ -77,7 +93,10 @@ export const MochiColorPickerPanel = () => {
     const [panelDragging, setPanelDragging] = React.useState(false);
     const [colorPickerDirection, setColorPickerDirection] = React.useState<"up" | "down">("down");
     const outlineSwatchRef = React.useRef<HTMLDivElement | null>(null);
+    const panelAnchorRef = React.useRef<HTMLDivElement | null>(null);
     const panelElementRef = React.useRef<HTMLDivElement | null>(null);
+    const panelDragFrameRef = React.useRef<number | null>(null);
+    const panelDragPendingOffsetRef = React.useRef(panelOffset);
     const panelDragRef = React.useRef<{
         pointerX: number;
         pointerY: number;
@@ -136,12 +155,27 @@ export const MochiColorPickerPanel = () => {
                 nextY -= nextBottom - window.innerHeight;
             }
 
-            setPanelOffset({ x: nextX, y: nextY });
+            panelDragPendingOffsetRef.current = { x: nextX, y: nextY };
+            if (panelDragFrameRef.current == null) {
+                panelDragFrameRef.current = window.requestAnimationFrame(() => {
+                    panelDragFrameRef.current = null;
+                    const anchor = panelAnchorRef.current;
+                    if (anchor != null) {
+                        const pending = panelDragPendingOffsetRef.current;
+                        anchor.style.transform = `translate(${pending.x}px, ${pending.y}px)`;
+                    }
+                });
+            }
         };
 
         const handleMouseUp = () => {
+            if (panelDragFrameRef.current != null) {
+                window.cancelAnimationFrame(panelDragFrameRef.current);
+                panelDragFrameRef.current = null;
+            }
             panelDragRef.current = null;
             setPanelDragging(false);
+            setPanelOffset(panelDragPendingOffsetRef.current);
         };
 
         window.addEventListener("mousemove", handleMouseMove);
@@ -203,6 +237,7 @@ export const MochiColorPickerPanel = () => {
         event.preventDefault();
         event.stopPropagation();
         const rect = panelElementRef.current?.getBoundingClientRect();
+        panelDragPendingOffsetRef.current = panelOffset;
         panelDragRef.current = {
             pointerX: event.clientX,
             pointerY: event.clientY,
@@ -227,34 +262,35 @@ export const MochiColorPickerPanel = () => {
 
     return (
         <div
+            ref={panelAnchorRef}
             className={styles.panelAnchor}
             style={{ transform: `translate(${panelOffset.x}px, ${panelOffset.y}px)` }}
         >
             <div ref={panelElementRef} className={`panel_YqS menu_O_M ${styles.panelFrame}`}>
                 <div className={`content_XD5 content_AD7 child-opacity-transition_nkS content_Hzl ${styles.panelContent}`}>
                     <div className={styles.titleBar}>
-                        <Tooltip tooltip={l("HoverPower.UI.Tooltip.Info")}>
+                        <Tooltip tooltip={text.tooltipInfo}>
                             <div className={styles.infoButton}>
                                 <img src={infoIconSrc} className={styles.infoIcon} alt="" />
                             </div>
                         </Tooltip>
 
-                        <Tooltip tooltip={l("HoverPower.UI.Tooltip.Draggable")}>
+                        <Tooltip tooltip={text.tooltipDraggable}>
                             <div
                                 className={`${styles.titleDragHandle} ${panelDragging ? styles.titleDragHandleActive : ""}`}
                                 onMouseDown={handlePanelDragStart}
                             >
-                                <span className={styles.titleText}>{l("HoverPower.UI.Title")}</span>
+                                <span className={styles.titleText}>{text.title}</span>
                             </div>
                         </Tooltip>
 
-                        <Tooltip tooltip={l("HoverPower.UI.Tooltip.Close")}>
+                        <Tooltip tooltip={text.tooltipClose}>
                             <Button
                                 className={closeButtonClass}
                                 variant="icon"
                                 onClick={handleClosePanel}
                                 focusKey={focusDisabled}
-                                aria-label={l("HoverPower.UI.Aria.ClosePanel")}
+                                aria-label={text.ariaClosePanel}
                             >
                                 <img src={closeIconSrc} className={styles.closeIcon} alt="" />
                             </Button>
@@ -263,13 +299,13 @@ export const MochiColorPickerPanel = () => {
 
                     <div className={styles.body}>
                         <div className={`${styles.controlRow} ${styles.outlineRow}`}>
-                            <Tooltip tooltip={l("HoverPower.UI.Tooltip.ResetOutline")}>
+                            <Tooltip tooltip={text.tooltipResetOutline}>
                                 <button type="button" className={styles.controlIconButton} onClick={handleResetOutline}>
                                     <img src={outlineIconSrc} className={styles.controlIcon} alt="" />
                                 </button>
                             </Tooltip>
                             <div className={`${styles.controlBody} ${styles.outlineControlBody}`}>
-                                <Tooltip tooltip={l("HoverPower.UI.Tooltip.OutlineSwatch")}>
+                                <Tooltip tooltip={text.tooltipOutlineSwatch}>
                                     <div
                                         ref={outlineSwatchRef}
                                         className={styles.outlineFieldShell}
@@ -294,12 +330,12 @@ export const MochiColorPickerPanel = () => {
                         </div>
 
                         <div className={styles.controlRow}>
-                            <Tooltip tooltip={l("HoverPower.UI.Tooltip.ResetFill")}>
+                            <Tooltip tooltip={text.tooltipResetFill}>
                                 <button type="button" className={styles.controlIconButton} onClick={handleResetFill}>
                                     <img src={fillIconSrc} className={styles.controlIcon} alt="" />
                                 </button>
                             </Tooltip>
-                            <Tooltip tooltip={l("HoverPower.UI.Tooltip.FillOpacity")}>
+                            <Tooltip tooltip={text.tooltipFillOpacity}>
                                 <div className={styles.controlBody}>
                                     <div className={styles.sliderRow}>
                                         <Slider
@@ -320,12 +356,12 @@ export const MochiColorPickerPanel = () => {
                         </div>
 
                         <div className={styles.controlRow}>
-                            <Tooltip tooltip={l("HoverPower.UI.Tooltip.ResetGuidelines")}>
+                            <Tooltip tooltip={text.tooltipResetGuidelines}>
                                 <button type="button" className={styles.controlIconButton} onClick={handleResetGuidelines}>
                                     <img src={guidelinesIconSrc} className={`${styles.controlIcon} ${styles.guidelinesIcon}`} alt="" />
                                 </button>
                             </Tooltip>
-                            <Tooltip tooltip={l("HoverPower.UI.Tooltip.GuidelinesOpacity")}>
+                            <Tooltip tooltip={text.tooltipGuidelinesOpacity}>
                                 <div className={styles.controlBody}>
                                     <div className={styles.sliderRow}>
                                         <Slider
@@ -348,7 +384,7 @@ export const MochiColorPickerPanel = () => {
 
                     <div className={styles.actions}>
                         <div className={styles.surfaceActions}>
-                            <Tooltip tooltip={l("HoverPower.UI.Tooltip.SurfaceToggle")}>
+                            <Tooltip tooltip={text.tooltipSurfaceToggle}>
                                 <button
                                     type="button"
                                     className={`${styles.actionButton} ${styles.surfaceButton} ${surfaceToolAreasSuppressed ? styles.surfaceButtonActive : ""}`}
@@ -359,7 +395,7 @@ export const MochiColorPickerPanel = () => {
                             </Tooltip>
                         </div>
                         <div className={styles.presetActions}>
-                            <Tooltip tooltip={l("HoverPower.UI.Tooltip.Preset1")}>
+                            <Tooltip tooltip={text.tooltipPreset1}>
                                 <button
                                     type="button"
                                     className={`${styles.actionButton} ${styles.presetButton} ${preset1Active ? styles.presetButtonActive : ""}`}
@@ -368,7 +404,7 @@ export const MochiColorPickerPanel = () => {
                                     <span className={styles.presetGlyph}>➀</span>
                                 </button>
                             </Tooltip>
-                            <Tooltip tooltip={l("HoverPower.UI.Tooltip.Preset2")}>
+                            <Tooltip tooltip={text.tooltipPreset2}>
                                 <button
                                     type="button"
                                     className={`${styles.actionButton} ${styles.presetButton} ${preset2Active ? styles.presetButtonActive : ""}`}
@@ -377,7 +413,7 @@ export const MochiColorPickerPanel = () => {
                                     <span className={styles.presetGlyph}>➁</span>
                                 </button>
                             </Tooltip>
-                            <Tooltip tooltip={l("HoverPower.UI.Tooltip.Reset")}>
+                            <Tooltip tooltip={text.tooltipReset}>
                                 <button
                                     type="button"
                                     className={`${styles.actionButton} ${styles.resetButton} ${vanillaOutlineActive ? styles.resetButtonActive : ""}`}
@@ -389,7 +425,7 @@ export const MochiColorPickerPanel = () => {
                         </div>
                     </div>
 
-                    <Tooltip tooltip={l("HoverPower.UI.Tooltip.Draggable")}>
+                    <Tooltip tooltip={text.tooltipDraggable}>
                         <div
                             className={`${styles.dragGrip} ${panelDragging ? styles.dragGripActive : ""}`}
                             onMouseDown={handlePanelDragStart}

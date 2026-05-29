@@ -11,6 +11,7 @@ using Game.UI;
 using HoverPower.Settings;
 using HoverPower.Systems;
 using System;
+using System.Collections.Generic;
 
 namespace HoverPower.UI
 {
@@ -25,6 +26,15 @@ namespace HoverPower.UI
         // Polled via WasReleasedThisFrame() each tick — matches CityWatchdog (no event handlers).
         private ProxyAction? m_TogglePanelAction;
         private ProxyAction? m_ToggleSurfaceToolAreasAction;
+        private ValueBinding<float> m_OutlineRBinding = null!;
+        private ValueBinding<float> m_OutlineGBinding = null!;
+        private ValueBinding<float> m_OutlineBBinding = null!;
+        private ValueBinding<float> m_OutlineABinding = null!;
+        private ValueBinding<float> m_FillABinding = null!;
+        private ValueBinding<int> m_GuidelineOpacityBinding = null!;
+        private ValueBinding<bool> m_PanelOpenBinding = null!;
+        private ValueBinding<bool> m_SurfaceToolAreasSuppressedBinding = null!;
+        private ValueBinding<bool> m_VanillaOutlineActiveBinding = null!;
 
         protected override void OnCreate()
         {
@@ -33,51 +43,7 @@ namespace HoverPower.UI
 
             InitializeKeybindActions();
 
-            AddUpdateBinding(new GetterValueBinding<float>(
-                Mod.ModId, "OutlineR",
-                () => Mod.Settings?.OutlineR ?? 0.502f));
-
-            AddUpdateBinding(new GetterValueBinding<float>(
-                Mod.ModId, "OutlineG",
-                () => Mod.Settings?.OutlineG ?? 0.869f));
-
-            AddUpdateBinding(new GetterValueBinding<float>(
-                Mod.ModId, "OutlineB",
-                () => Mod.Settings?.OutlineB ?? 1f));
-
-            AddUpdateBinding(new GetterValueBinding<float>(
-                Mod.ModId, "OutlineA",
-                () => Mod.Settings?.OutlineA ?? 0.855f));
-
-            AddUpdateBinding(new GetterValueBinding<float>(
-                Mod.ModId, "FillA",
-                () => Mod.Settings?.FillA ?? 0f));
-
-            AddUpdateBinding(new GetterValueBinding<int>(
-                Mod.ModId, "GuidelineOpacityPercent",
-                () => Mod.Settings?.GuidelineOpacityPercent ?? 40));
-
-            AddUpdateBinding(new GetterValueBinding<bool>(
-                Mod.ModId, "PanelOpen",
-                () => s_PanelOpen));
-
-            AddUpdateBinding(new GetterValueBinding<bool>(
-                Mod.ModId, "SurfaceToolAreasSuppressed",
-                () => SurfaceToolOverlaySystem.SuppressSurfaceToolAreas));
-
-            AddUpdateBinding(new GetterValueBinding<bool>(
-                Mod.ModId, "VanillaOutlineActive",
-                () =>
-                {
-                    HoverPowerSettings? settings = Mod.Settings;
-                    return settings != null
-                        && OutlineColorSystem.MatchesCapturedVanillaProfile(
-                            settings.OutlineR,
-                            settings.OutlineG,
-                            settings.OutlineB,
-                            settings.OutlineA,
-                            settings.FillA);
-                }));
+            RegisterValueBindings();
 
             AddBinding(new TriggerBinding<float, float, float, float>(
                 Mod.ModId,
@@ -92,6 +58,7 @@ namespace HoverPower.UI
                     settings.OutlineB = b;
                     settings.OutlineA = a;
                     settings.ApplyAndSave();
+                    SyncValueBindings();
                 }));
 
             AddBinding(new TriggerBinding<float>(
@@ -104,6 +71,7 @@ namespace HoverPower.UI
 
                     settings.FillA = a;
                     settings.ApplyAndSave();
+                    SyncValueBindings();
                 }));
 
             AddBinding(new TriggerBinding<int>(
@@ -119,6 +87,7 @@ namespace HoverPower.UI
 
                     settings.GuidelineOpacityPercent = percent;
                     settings.ApplyAndSave();
+                    SyncValueBindings();
                 }));
 
             AddBinding(new TriggerBinding(
@@ -136,6 +105,7 @@ namespace HoverPower.UI
                     settings.OutlineA = OutlineColorSystem.CapturedOutlineA;
                     settings.FillA = OutlineColorSystem.CapturedFillA;
                     settings.ApplyAndSave();
+                    SyncValueBindings();
                 }));
 
             AddBinding(new TriggerBinding(
@@ -152,27 +122,25 @@ namespace HoverPower.UI
                     settings.OutlineB = hovered.b;
                     settings.OutlineA = OutlineColorSystem.CapturedOutlineA;
                     settings.ApplyAndSave();
+                    SyncValueBindings();
                 }));
 
             AddBinding(new TriggerBinding<bool>(
                 Mod.ModId,
                 "SetPanelOpen",
-                open => s_PanelOpen = open));
+                SetPanelOpen));
 
             AddBinding(new TriggerBinding(
                 Mod.ModId,
                 "ToggleSurfaceToolAreas",
-                SurfaceToolOverlaySystem.ToggleSuppression));
+                ToggleSurfaceToolAreas));
         }
 
         protected override void OnUpdate()
         {
-            // CRITICAL: base.OnUpdate() ticks the m_UpdateBindings list (PanelOpen, OutlineR, etc).
-            // Without this call, every GetterValueBinding we registered goes silent — UI never sees
-            // settings changes, button stays selected=false even after click, hotkey toggles the
-            // C# flag but the panel never opens. CWD avoids this trap by using ValueBinding (push)
-            // instead of GetterValueBinding (pull); we use the pull style, so we must call base.
-            base.OnUpdate();
+            // CWD-style push bindings: do not call base.OnUpdate() because there are no
+            // GetterValueBindings to poll. This keeps the panel idle unless a value actually changes.
+            SyncValueBindings();
 
             // Re-fetch if the action wasn't ready at OnCreate (RegisterKeyBindings race) or got dropped.
             RefreshKeybindActions();
@@ -187,12 +155,82 @@ namespace HoverPower.UI
             if (m_TogglePanelAction?.WasReleasedThisFrame() == true)
             {
                 TogglePanel();
+                SyncValueBindings();
             }
 
             if (m_ToggleSurfaceToolAreasAction?.WasReleasedThisFrame() == true)
             {
-                SurfaceToolOverlaySystem.ToggleSuppression();
+                ToggleSurfaceToolAreas();
             }
+        }
+
+        private void RegisterValueBindings()
+        {
+            HoverPowerSettings? settings = Mod.Settings;
+            m_OutlineRBinding = AddValueBinding("OutlineR", settings?.OutlineR ?? 0.502f);
+            m_OutlineGBinding = AddValueBinding("OutlineG", settings?.OutlineG ?? 0.869f);
+            m_OutlineBBinding = AddValueBinding("OutlineB", settings?.OutlineB ?? 1f);
+            m_OutlineABinding = AddValueBinding("OutlineA", settings?.OutlineA ?? 0.855f);
+            m_FillABinding = AddValueBinding("FillA", settings?.FillA ?? 0f);
+            m_GuidelineOpacityBinding = AddValueBinding("GuidelineOpacityPercent", settings?.GuidelineOpacityPercent ?? 40);
+            m_PanelOpenBinding = AddValueBinding("PanelOpen", s_PanelOpen);
+            m_SurfaceToolAreasSuppressedBinding = AddValueBinding("SurfaceToolAreasSuppressed", SurfaceToolOverlaySystem.SuppressSurfaceToolAreas);
+            m_VanillaOutlineActiveBinding = AddValueBinding("VanillaOutlineActive", IsVanillaOutlineActive());
+        }
+
+        private ValueBinding<T> AddValueBinding<T>(string name, T initialValue)
+        {
+            ValueBinding<T> binding = new ValueBinding<T>(Mod.ModId, name, initialValue);
+            AddBinding(binding);
+            return binding;
+        }
+
+        private void SyncValueBindings()
+        {
+            HoverPowerSettings? settings = Mod.Settings;
+            UpdateIfChanged(m_OutlineRBinding, settings?.OutlineR ?? 0.502f);
+            UpdateIfChanged(m_OutlineGBinding, settings?.OutlineG ?? 0.869f);
+            UpdateIfChanged(m_OutlineBBinding, settings?.OutlineB ?? 1f);
+            UpdateIfChanged(m_OutlineABinding, settings?.OutlineA ?? 0.855f);
+            UpdateIfChanged(m_FillABinding, settings?.FillA ?? 0f);
+            UpdateIfChanged(m_GuidelineOpacityBinding, settings?.GuidelineOpacityPercent ?? 40);
+            UpdateIfChanged(m_PanelOpenBinding, s_PanelOpen);
+            UpdateIfChanged(m_SurfaceToolAreasSuppressedBinding, SurfaceToolOverlaySystem.SuppressSurfaceToolAreas);
+            UpdateIfChanged(m_VanillaOutlineActiveBinding, IsVanillaOutlineActive());
+        }
+
+        private static void UpdateIfChanged<T>(ValueBinding<T> binding, T value)
+        {
+            if (EqualityComparer<T>.Default.Equals(binding.value, value))
+            {
+                return;
+            }
+
+            binding.Update(value);
+        }
+
+        private void SetPanelOpen(bool open)
+        {
+            s_PanelOpen = open;
+            UpdateIfChanged(m_PanelOpenBinding, s_PanelOpen);
+        }
+
+        private void ToggleSurfaceToolAreas()
+        {
+            SurfaceToolOverlaySystem.ToggleSuppression();
+            UpdateIfChanged(m_SurfaceToolAreasSuppressedBinding, SurfaceToolOverlaySystem.SuppressSurfaceToolAreas);
+        }
+
+        private static bool IsVanillaOutlineActive()
+        {
+            HoverPowerSettings? settings = Mod.Settings;
+            return settings != null
+                && OutlineColorSystem.MatchesCapturedVanillaProfile(
+                    settings.OutlineR,
+                    settings.OutlineG,
+                    settings.OutlineB,
+                    settings.OutlineA,
+                    settings.FillA);
         }
 
         private void InitializeKeybindActions()
